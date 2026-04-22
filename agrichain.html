@@ -1,0 +1,2036 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AgriChain — Agricultural Supply Chain Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet" />
+<style>
+  /* ═══════════════════════════════════════════════
+     ROOT VARIABLES & RESET
+  ═══════════════════════════════════════════════ */
+  :root {
+    --soil: #1a1208;
+    --bark: #2d1f0a;
+    --clay: #5c3d1e;
+    --wheat: #c8a84b;
+    --harvest: #e8c547;
+    --lime: #7ab648;
+    --sage: #a8c47a;
+    --mist: #e8f0e0;
+    --cream: #f7f2e8;
+    --white: #fefefe;
+    --danger: #c0392b;
+    --info: #2980b9;
+    --success: #27ae60;
+    --pending: #f39c12;
+
+    --font-head: 'Syne', sans-serif;
+    --font-body: 'Lora', serif;
+    --font-mono: 'DM Mono', monospace;
+
+    --radius: 4px;
+    --radius-lg: 12px;
+    --shadow: 0 2px 16px rgba(26,18,8,.12);
+    --shadow-lg: 0 8px 40px rgba(26,18,8,.2);
+
+    --sidebar-w: 240px;
+    --header-h: 64px;
+    --transition: 200ms cubic-bezier(.4,0,.2,1);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 15px; }
+  body {
+    background: var(--cream);
+    color: var(--soil);
+    font-family: var(--font-body);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ═══════════════════════════════════════════════
+     LAYOUT
+  ═══════════════════════════════════════════════ */
+  .app { display: flex; min-height: 100vh; }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: var(--sidebar-w);
+    background: var(--soil);
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    z-index: 100;
+    transition: transform var(--transition);
+  }
+  .sidebar-logo {
+    padding: 24px 20px 20px;
+    border-bottom: 1px solid rgba(200,168,75,.2);
+  }
+  .sidebar-logo .logo-mark {
+    font-family: var(--font-head);
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--harvest);
+    letter-spacing: -0.5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .sidebar-logo .logo-mark svg { flex-shrink: 0; }
+  .logo-sub {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: rgba(200,168,75,.5);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+
+  .sidebar-nav { flex: 1; padding: 16px 0; overflow-y: auto; }
+  .nav-section-label {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 2.5px;
+    color: rgba(200,168,75,.35);
+    text-transform: uppercase;
+    padding: 12px 20px 6px;
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 20px;
+    cursor: pointer;
+    color: rgba(248,242,232,.6);
+    font-family: var(--font-head);
+    font-size: 13.5px;
+    font-weight: 600;
+    transition: all var(--transition);
+    border-left: 3px solid transparent;
+    position: relative;
+  }
+  .nav-item:hover { color: var(--cream); background: rgba(200,168,75,.07); }
+  .nav-item.active {
+    color: var(--harvest);
+    background: rgba(200,168,75,.12);
+    border-left-color: var(--harvest);
+  }
+  .nav-item svg { width: 16px; height: 16px; flex-shrink: 0; }
+  .nav-badge {
+    margin-left: auto;
+    background: var(--lime);
+    color: var(--soil);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 500;
+    padding: 2px 6px;
+    border-radius: 20px;
+  }
+
+  .sidebar-user {
+    padding: 16px 20px;
+    border-top: 1px solid rgba(200,168,75,.15);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .user-avatar {
+    width: 36px; height: 36px;
+    background: var(--wheat);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-head);
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--soil);
+    flex-shrink: 0;
+  }
+  .user-info .user-name {
+    font-family: var(--font-head);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--cream);
+  }
+  .user-info .user-role {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: rgba(200,168,75,.5);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  /* MAIN CONTENT */
+  .main {
+    margin-left: var(--sidebar-w);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  /* TOPBAR */
+  .topbar {
+    height: var(--header-h);
+    background: var(--white);
+    border-bottom: 1px solid rgba(92,61,30,.1);
+    display: flex;
+    align-items: center;
+    padding: 0 28px;
+    gap: 16px;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    box-shadow: 0 1px 8px rgba(26,18,8,.06);
+  }
+  .topbar-title {
+    font-family: var(--font-head);
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--soil);
+    flex: 1;
+  }
+  .topbar-actions { display: flex; align-items: center; gap: 10px; }
+  .btn {
+    padding: 8px 18px;
+    border-radius: var(--radius);
+    font-family: var(--font-head);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all var(--transition);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .btn-primary {
+    background: var(--wheat);
+    color: var(--soil);
+  }
+  .btn-primary:hover { background: var(--harvest); transform: translateY(-1px); box-shadow: var(--shadow); }
+  .btn-outline {
+    background: transparent;
+    color: var(--clay);
+    border: 1.5px solid rgba(92,61,30,.25);
+  }
+  .btn-outline:hover { border-color: var(--wheat); color: var(--soil); }
+  .btn-danger { background: var(--danger); color: white; }
+  .btn-danger:hover { background: #a93226; }
+  .btn-success { background: var(--success); color: white; }
+  .btn-sm { padding: 5px 12px; font-size: 12px; }
+
+  /* API STATUS */
+  .api-status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--clay);
+    padding: 6px 12px;
+    border-radius: 20px;
+    background: rgba(92,61,30,.07);
+  }
+  .api-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--pending);
+    animation: pulse 2s infinite;
+  }
+  .api-dot.online { background: var(--success); animation: none; }
+  .api-dot.offline { background: var(--danger); animation: none; }
+  @keyframes pulse { 0%,100%{opacity:1}50%{opacity:.4} }
+
+  /* PAGE CONTENT */
+  .page-content {
+    flex: 1;
+    padding: 28px;
+    overflow-y: auto;
+  }
+
+  /* PAGE (single screen views) */
+  .page { display: none; animation: fadeIn .25s ease; }
+  .page.active { display: block; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none} }
+
+  /* ═══════════════════════════════════════════════
+     DASHBOARD CARDS
+  ═══════════════════════════════════════════════ */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 18px;
+    margin-bottom: 28px;
+  }
+  .stat-card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    padding: 20px 22px;
+    border: 1px solid rgba(92,61,30,.08);
+    box-shadow: var(--shadow);
+    transition: transform var(--transition);
+    position: relative;
+    overflow: hidden;
+  }
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+  }
+  .stat-card.green::before { background: var(--lime); }
+  .stat-card.gold::before { background: var(--harvest); }
+  .stat-card.brown::before { background: var(--clay); }
+  .stat-card.blue::before { background: var(--info); }
+  .stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+  .stat-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: rgba(92,61,30,.55);
+    margin-bottom: 10px;
+  }
+  .stat-value {
+    font-family: var(--font-head);
+    font-size: 30px;
+    font-weight: 800;
+    color: var(--soil);
+    line-height: 1;
+  }
+  .stat-sub {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: rgba(92,61,30,.45);
+    margin-top: 6px;
+  }
+  .stat-icon {
+    position: absolute;
+    right: 18px; top: 18px;
+    opacity: .1;
+    font-size: 40px;
+  }
+
+  /* SECTION HEADER */
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .section-title {
+    font-family: var(--font-head);
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--soil);
+  }
+  .section-title small {
+    font-size: 12px;
+    font-weight: 400;
+    font-family: var(--font-mono);
+    color: rgba(92,61,30,.4);
+    margin-left: 8px;
+  }
+
+  /* GRID LAYOUTS */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+  @media (max-width: 900px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+
+  /* CARD */
+  .card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    border: 1px solid rgba(92,61,30,.08);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .card-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid rgba(92,61,30,.07);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .card-title {
+    font-family: var(--font-head);
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--soil);
+  }
+  .card-body { padding: 20px; }
+
+  /* TABLE */
+  .table-wrap { overflow-x: auto; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+  }
+  thead tr { border-bottom: 2px solid rgba(92,61,30,.1); }
+  th {
+    padding: 10px 14px;
+    text-align: left;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: rgba(92,61,30,.5);
+    font-weight: 500;
+  }
+  td {
+    padding: 11px 14px;
+    border-bottom: 1px solid rgba(92,61,30,.05);
+    color: var(--soil);
+    font-family: var(--font-body);
+    font-size: 13.5px;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(200,168,75,.04); }
+
+  /* BADGE */
+  .badge {
+    display: inline-block;
+    padding: 3px 9px;
+    border-radius: 20px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: .5px;
+    text-transform: uppercase;
+  }
+  .badge-green { background: rgba(122,182,72,.15); color: #3d7a1a; }
+  .badge-gold { background: rgba(232,197,71,.2); color: #7a5e0a; }
+  .badge-red { background: rgba(192,57,43,.12); color: #8b1a0e; }
+  .badge-blue { background: rgba(41,128,185,.12); color: #1a5a8b; }
+  .badge-grey { background: rgba(92,61,30,.1); color: var(--clay); }
+
+  /* FORM */
+  .form-group { margin-bottom: 16px; }
+  .form-label {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: rgba(92,61,30,.6);
+    margin-bottom: 6px;
+  }
+  .form-control {
+    width: 100%;
+    padding: 9px 13px;
+    border: 1.5px solid rgba(92,61,30,.2);
+    border-radius: var(--radius);
+    font-family: var(--font-body);
+    font-size: 14px;
+    color: var(--soil);
+    background: var(--cream);
+    transition: border-color var(--transition);
+    outline: none;
+  }
+  .form-control:focus { border-color: var(--wheat); background: var(--white); }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  select.form-control { cursor: pointer; }
+
+  /* MODAL */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(26,18,8,.6);
+    backdrop-filter: blur(4px);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    width: 520px;
+    max-width: 95vw;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: var(--shadow-lg);
+    animation: modalIn .25s ease;
+  }
+  @keyframes modalIn { from{transform:scale(.94);opacity:0} to{transform:scale(1);opacity:1} }
+  .modal-header {
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid rgba(92,61,30,.08);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .modal-title {
+    font-family: var(--font-head);
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--soil);
+  }
+  .modal-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 22px;
+    color: var(--clay);
+    line-height: 1;
+    padding: 0 4px;
+  }
+  .modal-body { padding: 24px; }
+  .modal-footer {
+    padding: 16px 24px;
+    border-top: 1px solid rgba(92,61,30,.08);
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+  }
+
+  /* ALERT / TOAST */
+  .toast-container {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 300;
+  }
+  .toast {
+    background: var(--soil);
+    color: var(--cream);
+    padding: 12px 18px;
+    border-radius: var(--radius);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    min-width: 240px;
+    box-shadow: var(--shadow-lg);
+    border-left: 4px solid var(--harvest);
+    animation: slideIn .3s ease;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .toast.success { border-left-color: var(--lime); }
+  .toast.error { border-left-color: var(--danger); }
+  @keyframes slideIn { from{transform:translateX(60px);opacity:0} to{transform:none;opacity:1} }
+
+  /* EMPTY STATE */
+  .empty-state {
+    text-align: center;
+    padding: 48px 24px;
+  }
+  .empty-state .empty-icon { font-size: 48px; margin-bottom: 12px; opacity: .4; }
+  .empty-state p {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: rgba(92,61,30,.4);
+  }
+
+  /* LOADING SPINNER */
+  .spinner {
+    width: 20px; height: 20px;
+    border: 2px solid rgba(92,61,30,.15);
+    border-top-color: var(--wheat);
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+    display: inline-block;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-row {
+    display: flex; align-items: center; justify-content: center;
+    padding: 32px; gap: 12px;
+    font-family: var(--font-mono); font-size: 12px; color: rgba(92,61,30,.4);
+  }
+
+  /* LOGIN PAGE */
+  .login-page {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: var(--soil);
+    z-index: 500;
+    align-items: center;
+    justify-content: center;
+  }
+  .login-page.active { display: flex; }
+  .login-box {
+    background: var(--bark);
+    border-radius: 16px;
+    padding: 48px;
+    width: 420px;
+    max-width: 95vw;
+    border: 1px solid rgba(200,168,75,.15);
+    box-shadow: 0 24px 80px rgba(0,0,0,.5);
+    animation: modalIn .4s ease;
+  }
+  .login-logo {
+    font-family: var(--font-head);
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--harvest);
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .login-subtitle {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: rgba(200,168,75,.4);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 36px;
+  }
+  .login-form .form-label { color: rgba(200,168,75,.5); }
+  .login-form .form-control {
+    background: rgba(200,168,75,.07);
+    border-color: rgba(200,168,75,.2);
+    color: var(--cream);
+  }
+  .login-form .form-control:focus { border-color: var(--harvest); background: rgba(200,168,75,.1); }
+  .login-form .form-control::placeholder { color: rgba(200,168,75,.25); }
+  .login-btn {
+    width: 100%;
+    padding: 12px;
+    background: var(--harvest);
+    color: var(--soil);
+    border: none;
+    border-radius: var(--radius);
+    font-family: var(--font-head);
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: all var(--transition);
+  }
+  .login-btn:hover { background: var(--wheat); transform: translateY(-1px); }
+  .login-error {
+    background: rgba(192,57,43,.15);
+    border: 1px solid rgba(192,57,43,.3);
+    color: #e88; padding: 10px 14px; border-radius: var(--radius);
+    font-family: var(--font-mono); font-size: 12px; margin-bottom: 14px; display: none;
+  }
+  .demo-hint {
+    margin-top: 24px;
+    padding: 12px;
+    background: rgba(200,168,75,.07);
+    border-radius: var(--radius);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: rgba(200,168,75,.5);
+    line-height: 1.7;
+  }
+
+  /* TIMELINE / AUDIT LOG */
+  .timeline { list-style: none; position: relative; padding-left: 28px; }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 7px; top: 0; bottom: 0;
+    width: 1.5px;
+    background: rgba(92,61,30,.1);
+  }
+  .timeline li {
+    position: relative;
+    padding-bottom: 20px;
+  }
+  .timeline li::before {
+    content: '';
+    position: absolute;
+    left: -25px; top: 4px;
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    background: var(--wheat);
+    border: 2px solid var(--cream);
+    box-shadow: 0 0 0 2px rgba(200,168,75,.3);
+  }
+  .timeline .tl-time {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: rgba(92,61,30,.4);
+    margin-bottom: 2px;
+  }
+  .timeline .tl-action {
+    font-family: var(--font-head);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--soil);
+  }
+  .timeline .tl-detail {
+    font-size: 12.5px;
+    color: rgba(92,61,30,.65);
+    margin-top: 2px;
+  }
+
+  /* MINI CHART (pure CSS) */
+  .bar-chart { display: flex; align-items: flex-end; gap: 6px; height: 80px; }
+  .bar {
+    flex: 1;
+    background: rgba(200,168,75,.2);
+    border-radius: 3px 3px 0 0;
+    position: relative;
+    transition: background var(--transition);
+    min-height: 4px;
+  }
+  .bar:hover { background: rgba(200,168,75,.5); }
+  .bar .bar-label {
+    position: absolute;
+    bottom: -18px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: rgba(92,61,30,.4);
+    white-space: nowrap;
+  }
+
+  /* TABS */
+  .tabs { display: flex; gap: 0; border-bottom: 2px solid rgba(92,61,30,.1); margin-bottom: 20px; }
+  .tab {
+    padding: 10px 20px;
+    font-family: var(--font-head);
+    font-size: 13px;
+    font-weight: 600;
+    color: rgba(92,61,30,.5);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: all var(--transition);
+  }
+  .tab:hover { color: var(--soil); }
+  .tab.active { color: var(--soil); border-bottom-color: var(--harvest); }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* SEARCH & FILTER */
+  .search-bar {
+    position: relative;
+    width: 280px;
+  }
+  .search-bar input {
+    width: 100%;
+    padding: 8px 14px 8px 36px;
+    border: 1.5px solid rgba(92,61,30,.15);
+    border-radius: 20px;
+    font-family: var(--font-body);
+    font-size: 13px;
+    color: var(--soil);
+    background: var(--cream);
+    outline: none;
+    transition: all var(--transition);
+  }
+  .search-bar input:focus { border-color: var(--wheat); background: var(--white); }
+  .search-bar::before {
+    content: '🔍';
+    position: absolute;
+    left: 12px; top: 50%;
+    transform: translateY(-50%);
+    font-size: 12px;
+    pointer-events: none;
+  }
+
+  /* MICRO INTERACTIONS */
+  .clickable { cursor: pointer; }
+  .text-muted { color: rgba(92,61,30,.4); font-family: var(--font-mono); font-size: 12px; }
+  .text-success { color: var(--success); }
+  .text-danger { color: var(--danger); }
+  .mb-4 { margin-bottom: 16px; }
+  .mb-6 { margin-bottom: 24px; }
+  .flex { display: flex; }
+  .gap-2 { gap: 8px; }
+  .items-center { align-items: center; }
+  .justify-between { justify-content: space-between; }
+  hr { border: none; border-top: 1px solid rgba(92,61,30,.08); margin: 20px 0; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ LOGIN PAGE ═══════════════ -->
+<div class="login-page active" id="loginPage">
+  <div class="login-box">
+    <div class="login-logo">
+      <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+        <path d="M16 4C16 4 6 10 6 19C6 24.52 10.48 29 16 29C21.52 29 26 24.52 26 19C26 10 16 4 16 4Z" fill="#e8c547" opacity=".8"/>
+        <path d="M16 8C16 8 10 12.5 10 19C10 22.31 12.69 25 16 25C19.31 25 22 22.31 22 19C22 12.5 16 8 16 8Z" fill="#1a1208"/>
+        <path d="M16 12C16 12 12 15 12 19C12 21.21 13.79 23 16 23C18.21 23 20 21.21 20 19C20 15 16 12 16 12Z" fill="#e8c547"/>
+      </svg>
+      AgriChain
+    </div>
+    <div class="login-subtitle">Agricultural Supply Chain Platform</div>
+    <div class="login-error" id="loginError"></div>
+    <div class="login-form">
+      <div class="form-group">
+        <label class="form-label">Email Address</label>
+        <input class="form-control" type="email" id="loginEmail" placeholder="admin@agrichain.com" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input class="form-control" type="password" id="loginPassword" placeholder="••••••••" />
+      </div>
+      <button class="login-btn" onclick="doLogin()">Sign In →</button>
+    </div>
+    <div class="demo-hint">
+      <strong>Demo Mode</strong> — if backend is not running,<br>
+      use any email + password to explore the UI.<br>
+      Gateway: <code>http://localhost:8090</code>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ MAIN APP ═══════════════ -->
+<div class="app" id="mainApp" style="display:none">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">
+        <svg width="22" height="22" viewBox="0 0 32 32" fill="none">
+          <path d="M16 4C16 4 6 10 6 19C6 24.52 10.48 29 16 29C21.52 29 26 24.52 26 19C26 10 16 4 16 4Z" fill="#e8c547" opacity=".8"/>
+          <path d="M16 8C16 8 10 12.5 10 19C10 22.31 12.69 25 16 25C19.31 25 22 22.31 22 19C22 12.5 16 8 16 8Z" fill="#1a1208"/>
+          <path d="M16 12C16 12 12 15 12 19C12 21.21 13.79 23 16 23C18.21 23 20 21.21 20 19C20 15 16 12 16 12Z" fill="#e8c547"/>
+        </svg>
+        AgriChain
+      </div>
+      <div class="logo-sub">Supply Chain Platform</div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Overview</div>
+      <div class="nav-item active" onclick="navTo('dashboard', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </div>
+
+      <div class="nav-section-label">Users & Farmers</div>
+      <div class="nav-item" onclick="navTo('users', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+        Users
+      </div>
+      <div class="nav-item" onclick="navTo('farmers', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17l4-8 4 4 4-6 4 10"/></svg>
+        Farmers
+      </div>
+
+      <div class="nav-section-label">Market</div>
+      <div class="nav-item" onclick="navTo('crops', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 00-7 17l2-5h10l2 5A10 10 0 0012 2z"/></svg>
+        Crop Listings
+      </div>
+      <div class="nav-item" onclick="navTo('orders', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+        Orders
+      </div>
+
+      <div class="nav-section-label">Finance</div>
+      <div class="nav-item" onclick="navTo('transactions', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+        Transactions
+      </div>
+      <div class="nav-item" onclick="navTo('subsidy', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>
+        Subsidies
+      </div>
+
+      <div class="nav-section-label">Compliance</div>
+      <div class="nav-item" onclick="navTo('audit', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>
+        Audit Logs
+      </div>
+      <div class="nav-item" onclick="navTo('reports', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+        Reports
+      </div>
+    </nav>
+
+    <div class="sidebar-user">
+      <div class="user-avatar" id="userAvatar">A</div>
+      <div class="user-info">
+        <div class="user-name" id="userName">Admin User</div>
+        <div class="user-role" id="userRole">Administrator</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <header class="topbar">
+      <div class="topbar-title" id="pageTitle">Dashboard</div>
+      <div class="topbar-actions">
+        <div class="api-status" id="apiStatus">
+          <div class="api-dot" id="apiDot"></div>
+          <span id="apiStatusText">Connecting…</span>
+        </div>
+        <button class="btn btn-outline btn-sm" onclick="refreshPage()">↻ Refresh</button>
+        <button class="btn btn-outline btn-sm" onclick="doLogout()">Sign Out</button>
+      </div>
+    </header>
+
+    <div class="page-content">
+
+      <!-- ══════════ DASHBOARD ══════════ -->
+      <div class="page active" id="page-dashboard">
+        <div class="stats-grid" id="dashStats">
+          <div class="stat-card green">
+            <div class="stat-icon">🌾</div>
+            <div class="stat-label">Total Listings</div>
+            <div class="stat-value" id="stat-listings">—</div>
+            <div class="stat-sub">Crop market listings</div>
+          </div>
+          <div class="stat-card gold">
+            <div class="stat-icon">📦</div>
+            <div class="stat-label">Total Orders</div>
+            <div class="stat-value" id="stat-orders">—</div>
+            <div class="stat-sub">Marketplace orders</div>
+          </div>
+          <div class="stat-card blue">
+            <div class="stat-icon">💰</div>
+            <div class="stat-label">Transactions</div>
+            <div class="stat-value" id="stat-txns">—</div>
+            <div class="stat-sub">Pending transactions</div>
+          </div>
+          <div class="stat-card brown">
+            <div class="stat-icon">👩‍🌾</div>
+            <div class="stat-label">Farmers</div>
+            <div class="stat-value" id="stat-farmers">—</div>
+            <div class="stat-sub">Registered farmers</div>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Recent Crop Listings</div>
+              <button class="btn btn-outline btn-sm" onclick="navTo('crops', document.querySelector('.nav-item:nth-child(7)'))">View All</button>
+            </div>
+            <div id="dashListings">
+              <div class="loading-row"><div class="spinner"></div> Loading…</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Recent Transactions</div>
+              <button class="btn btn-outline btn-sm" onclick="navTo('transactions', document.querySelector('.nav-item:nth-child(9)'))">View All</button>
+            </div>
+            <div id="dashTxns">
+              <div class="loading-row"><div class="spinner"></div> Loading…</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════ USERS ══════════ -->
+      <div class="page" id="page-users">
+        <div class="section-header mb-6">
+          <div class="section-title">Users <small>Registration Service</small></div>
+          <div style="display:flex;gap:10px;align-items:center">
+            <div class="search-bar"><input type="text" placeholder="Search users…" oninput="filterTable('usersTable', this.value)"/></div>
+            <button class="btn btn-primary" onclick="openModal('addUserModal')">+ New User</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="table-wrap">
+            <table id="usersTable">
+              <thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Actions</th></tr></thead>
+              <tbody id="usersTbody"><tr><td colspan="6"><div class="loading-row"><div class="spinner"></div> Loading users…</div></td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════ FARMERS ══════════ -->
+      <div class="page" id="page-farmers">
+        <div class="section-header mb-6">
+          <div class="section-title">Farmers <small>Registration Service</small></div>
+          <div style="display:flex;gap:10px;align-items:center">
+            <div class="search-bar"><input type="text" placeholder="Search farmers…" oninput="filterTable('farmersTable', this.value)"/></div>
+            <button class="btn btn-primary" onclick="openModal('addFarmerModal')">+ Register Farmer</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="table-wrap">
+            <table id="farmersTable">
+              <thead><tr><th>ID</th><th>Name</th><th>Gender</th><th>Status</th><th>Verification</th><th>Phone</th><th>Actions</th></tr></thead>
+              <tbody id="farmersTbody"><tr><td colspan="7"><div class="loading-row"><div class="spinner"></div> Loading farmers…</div></td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════ CROP LISTINGS ══════════ -->
+      <div class="page" id="page-crops">
+        <div class="section-header mb-6">
+          <div class="section-title">Crop Listings <small>Market Service · /market</small></div>
+          <div style="display:flex;gap:10px;align-items:center">
+            <select class="form-control" style="width:180px" onchange="filterCropsByStatus(this.value)">
+              <option value="">All Statuses</option>
+              <option value="PENDING">PENDING</option>
+              <option value="VALIDATED">VALIDATED</option>
+              <option value="SOLD">SOLD</option>
+            </select>
+            <button class="btn btn-primary" onclick="openModal('addCropModal')">+ New Listing</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="table-wrap">
+            <table id="cropsTable">
+              <thead><tr><th>ID</th><th>Crop Name</th><th>Quantity</th><th>Price/Unit</th><th>Farmer ID</th><th>Status</th><th>Actions</th></tr></thead>
+              <tbody id="cropsTbody"><tr><td colspan="7"><div class="loading-row"><div class="spinner"></div> Loading listings…</div></td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════ ORDERS ══════════ -->
+      <div class="page" id="page-orders">
+        <div class="section-header mb-6">
+          <div class="section-title">Orders <small>Market Service</small></div>
+          <button class="btn btn-primary" onclick="openModal('placeOrderModal')">+ Place Order</button>
+        </div>
+        <div class="card">
+          <div class="table-wrap">
+            <table id="ordersTable">
+              <thead><tr><th>Order ID</th><th>Listing ID</th><th>Trader ID</th><th>Quantity</th><th>Total Price</th><th>Status</th><th>Actions</th></tr></thead>
+              <tbody id="ordersTbody"><tr><td colspan="7"><div class="loading-row"><div class="spinner"></div> Loading orders…</div></td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════ TRANSACTIONS ══════════ -->
+      <div class="page" id="page-transactions">
+        <div class="section-header mb-6">
+          <div class="section-title">Transactions & Payments <small>Transaction Service</small></div>
+          <button class="btn btn-primary" onclick="openModal('initiateModal')">+ Initiate Transaction</button>
+        </div>
+        <div class="tabs">
+          <div class="tab active" onclick="switchTab('txTab','txn-list',this)">Transactions</div>
+          <div class="tab" onclick="switchTab('txTab','txn-payments',this)">Payments</div>
+        </div>
+        <div class="tab-content active" id="txn-list">
+          <div class="card">
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>ID</th><th>Order ID</th><th>Amount</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead>
+                <tbody id="txnTbody"><tr><td colspan="6"><div class="loading-row"><div class="spinner"></div> Loading…</div></td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div class="tab-content" id="txn-payments">
+          <div class="card">
+            <div class="card-body">
+              <div class="section-header mb-4">
+                <div class="section-title" style="font-size:14px">Record a Payment</div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Transaction ID</label>
+                  <input class="form-control" type="number" id="payTxnId" placeholder="e.g. 42" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Payment Method</label>
+                  <select class="form-control" id="payMethod">
+                    <option value="UPI">UPI</option>
+                    <option value="BANK_TRANSFER">Bank Transfer</option>
+                    <option value="CASH">Cash</option>
+                    <option value="CARD">Card</option>
+                  </select>
+                </div>
+              </div>
+              <button class="btn btn-primary" onclick="recordPayment()">Record Payment</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════ SUBSIDY ══════════ -->
+      <div class="page" id="page-subsidy">
+        <div class="section-header mb-6">
+          <div class="section-title">Subsidy Programs <small>Subsidy Service</small></div>
+          <button class="btn btn-primary" onclick="openModal('addSubsidyModal')">+ New Program</button>
+        </div>
+        <div class="card">
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>ID</th><th>Title</th><th>Budget (₹)</th><th>Status</th><th>Start Date</th><th>End Date</th><th>Actions</th></tr></thead>
+              <tbody id="subsidyTbody"><tr><td colspan="7"><div class="loading-row"><div class="spinner"></div> Loading…</div></td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════ AUDIT LOGS ══════════ -->
+      <div class="page" id="page-audit">
+        <div class="section-header mb-6">
+          <div class="section-title">Audit Logs <small>Audit & Compliance Service</small></div>
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-header"><div class="card-title">Activity Timeline</div></div>
+            <div class="card-body">
+              <ul class="timeline" id="auditTimeline">
+                <li><div class="loading-row"><div class="spinner"></div> Loading logs…</div></li>
+              </ul>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">All Audit Records</div></div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Action</th><th>By</th><th>Role</th><th>Time</th></tr></thead>
+                <tbody id="auditTbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════ REPORTS ══════════ -->
+      <div class="page" id="page-reports">
+        <div class="section-header mb-6">
+          <div class="section-title">Reports <small>Report Service</small></div>
+          <button class="btn btn-primary" onclick="generateReport()">Generate Report</button>
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-header"><div class="card-title">Transaction Volume</div></div>
+            <div class="card-body">
+              <div class="bar-chart" id="reportChart">
+                <div class="loading-row"><div class="spinner"></div> Loading chart…</div>
+              </div>
+              <div style="height:20px"></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">Saved Reports</div></div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>ID</th><th>Type</th><th>Generated At</th><th>Status</th></tr></thead>
+                <tbody id="reportsTbody"><tr><td colspan="4"><div class="loading-row"><div class="spinner"></div></div></td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /page-content -->
+  </main>
+</div><!-- /app -->
+
+<!-- ═══════════════ MODALS ═══════════════ -->
+
+<!-- Add User Modal -->
+<div class="modal-overlay" id="addUserModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Register New User</div>
+      <button class="modal-close" onclick="closeModal('addUserModal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">First Name</label><input class="form-control" id="uFirstName" placeholder="John"/></div>
+        <div class="form-group"><label class="form-label">Last Name</label><input class="form-control" id="uLastName" placeholder="Doe"/></div>
+      </div>
+      <div class="form-group"><label class="form-label">Email</label><input class="form-control" type="email" id="uEmail" placeholder="john@example.com"/></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Password</label><input class="form-control" type="password" id="uPassword" placeholder="••••••••"/></div>
+        <div class="form-group">
+          <label class="form-label">Role</label>
+          <select class="form-control" id="uRole">
+            <option value="ADMIN">Admin</option>
+            <option value="MANAGER">Manager</option>
+            <option value="OFFICER">Officer</option>
+            <option value="AUDITOR">Auditor</option>
+            <option value="FARMER">Farmer</option>
+            <option value="TRADER">Trader</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group"><label class="form-label">Phone</label><input class="form-control" id="uPhone" placeholder="+91 9876543210"/></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('addUserModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="submitAddUser()">Register User</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Farmer Modal -->
+<div class="modal-overlay" id="addFarmerModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Register Farmer</div>
+      <button class="modal-close" onclick="closeModal('addFarmerModal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">First Name</label><input class="form-control" id="fFirst" placeholder="Ravi"/></div>
+        <div class="form-group"><label class="form-label">Last Name</label><input class="form-control" id="fLast" placeholder="Kumar"/></div>
+      </div>
+      <div class="form-group"><label class="form-label">Phone</label><input class="form-control" id="fPhone" placeholder="9876543210"/></div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Gender</label>
+          <select class="form-control" id="fGender"><option value="MALE">Male</option><option value="FEMALE">Female</option><option value="OTHER">Other</option></select>
+        </div>
+        <div class="form-group"><label class="form-label">Land Size (acres)</label><input class="form-control" type="number" id="fLand" placeholder="5.5"/></div>
+      </div>
+      <div class="form-group"><label class="form-label">Address</label><input class="form-control" id="fAddr" placeholder="Village, District, State"/></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('addFarmerModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="submitAddFarmer()">Register</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Crop Listing Modal -->
+<div class="modal-overlay" id="addCropModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Create Crop Listing</div>
+      <button class="modal-close" onclick="closeModal('addCropModal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Crop Name</label><input class="form-control" id="cropName" placeholder="Wheat"/></div>
+        <div class="form-group"><label class="form-label">Farmer ID</label><input class="form-control" type="number" id="cropFarmerId" placeholder="1"/></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Quantity (kg)</label><input class="form-control" type="number" id="cropQty" placeholder="500"/></div>
+        <div class="form-group"><label class="form-label">Price per kg (₹)</label><input class="form-control" type="number" id="cropPrice" placeholder="25.50"/></div>
+      </div>
+      <div class="form-group"><label class="form-label">Location</label><input class="form-control" id="cropLocation" placeholder="Punjab, India"/></div>
+      <div class="form-group"><label class="form-label">Description</label><input class="form-control" id="cropDesc" placeholder="High quality wheat..."/></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('addCropModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="submitCropListing()">Create Listing</button>
+    </div>
+  </div>
+</div>
+
+<!-- Place Order Modal -->
+<div class="modal-overlay" id="placeOrderModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Place Order</div>
+      <button class="modal-close" onclick="closeModal('placeOrderModal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Listing ID</label><input class="form-control" type="number" id="ordListingId" placeholder="1"/></div>
+        <div class="form-group"><label class="form-label">Trader ID</label><input class="form-control" type="number" id="ordTraderId" placeholder="2"/></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Quantity (kg)</label><input class="form-control" type="number" id="ordQty" placeholder="100"/></div>
+        <div class="form-group"><label class="form-label">Total Price (₹)</label><input class="form-control" type="number" id="ordPrice" placeholder="2550"/></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('placeOrderModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="submitOrder()">Place Order</button>
+    </div>
+  </div>
+</div>
+
+<!-- Initiate Transaction Modal -->
+<div class="modal-overlay" id="initiateModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Initiate Transaction</div>
+      <button class="modal-close" onclick="closeModal('initiateModal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Order ID</label><input class="form-control" type="number" id="txOrderId" placeholder="1"/></div>
+        <div class="form-group"><label class="form-label">Amount (₹)</label><input class="form-control" type="number" id="txAmount" placeholder="2550"/></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('initiateModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="submitTransaction()">Initiate</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Subsidy Program Modal -->
+<div class="modal-overlay" id="addSubsidyModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Create Subsidy Program</div>
+      <button class="modal-close" onclick="closeModal('addSubsidyModal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label">Program Title</label><input class="form-control" id="subTitle" placeholder="PM-KISAN Scheme"/></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Allotted Budget (₹)</label><input class="form-control" type="number" id="subBudget" placeholder="500000"/></div>
+        <div class="form-group">
+          <label class="form-label">Status</label>
+          <select class="form-control" id="subStatus"><option value="ACTIVE">Active</option><option value="INACTIVE">Inactive</option><option value="COMPLETED">Completed</option></select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Start Date</label><input class="form-control" type="date" id="subStart"/></div>
+        <div class="form-group"><label class="form-label">End Date</label><input class="form-control" type="date" id="subEnd"/></div>
+      </div>
+      <div class="form-group"><label class="form-label">Description</label><input class="form-control" id="subDesc" placeholder="Program description…"/></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('addSubsidyModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="submitSubsidy()">Create Program</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- ═══════════════ JAVASCRIPT ═══════════════ -->
+<script>
+/* ════════════════════════════════════════
+   CONFIG
+════════════════════════════════════════ */
+const BASE = 'http://localhost:8090';
+let JWT_TOKEN = localStorage.getItem('agrichain_token') || null;
+let CURRENT_USER = JSON.parse(localStorage.getItem('agrichain_user') || 'null');
+let DEMO_MODE = false;
+
+/* ════════════════════════════════════════
+   API HELPER
+════════════════════════════════════════ */
+async function api(method, path, body = null) {
+  const headers = { 'Content-Type': 'application/json' };
+  if (JWT_TOKEN) headers['Authorization'] = 'Bearer ' + JWT_TOKEN;
+  const opts = { method, headers };
+  if (body) opts.body = JSON.stringify(body);
+  try {
+    const res = await fetch(BASE + path, opts);
+    if (!res.ok) {
+      const txt = await res.text();
+      throw new Error(txt || res.statusText);
+    }
+    const ct = res.headers.get('content-type') || '';
+    if (ct.includes('application/json')) return await res.json();
+    return await res.text();
+  } catch (e) {
+    if (e.message.includes('fetch')) {
+      setApiStatus('offline');
+      if (!DEMO_MODE) throw new Error('Cannot reach backend at ' + BASE);
+    }
+    throw e;
+  }
+}
+
+/* ════════════════════════════════════════
+   API STATUS
+════════════════════════════════════════ */
+function setApiStatus(status) {
+  const dot = document.getElementById('apiDot');
+  const txt = document.getElementById('apiStatusText');
+  dot.className = 'api-dot ' + status;
+  txt.textContent = { online: 'API Online', offline: 'API Offline', pending: 'Connecting…' }[status] || status;
+}
+
+async function checkApiStatus() {
+  try {
+    await fetch(BASE + '/actuator/health', { signal: AbortSignal.timeout(3000) });
+    setApiStatus('online');
+    DEMO_MODE = false;
+  } catch {
+    setApiStatus('offline');
+    DEMO_MODE = true;
+  }
+}
+
+/* ════════════════════════════════════════
+   AUTHENTICATION
+════════════════════════════════════════ */
+async function doLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const errEl = document.getElementById('loginError');
+  errEl.style.display = 'none';
+
+  if (!email || !password) {
+    errEl.textContent = 'Please enter email and password.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  try {
+    let token;
+    try {
+      token = await api('POST', '/users/login', { email, password });
+    } catch {
+      // Demo mode fallback
+      DEMO_MODE = true;
+      token = 'demo-token-' + Date.now();
+    }
+
+    JWT_TOKEN = typeof token === 'string' ? token : JSON.stringify(token);
+    localStorage.setItem('agrichain_token', JWT_TOKEN);
+
+    const nameParts = email.split('@')[0].split('.');
+    CURRENT_USER = {
+      email,
+      name: nameParts.map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(' '),
+      role: 'ADMIN'
+    };
+    localStorage.setItem('agrichain_user', JSON.stringify(CURRENT_USER));
+
+    showApp();
+  } catch (e) {
+    errEl.textContent = e.message;
+    errEl.style.display = 'block';
+  }
+}
+
+function doLogout() {
+  JWT_TOKEN = null;
+  localStorage.removeItem('agrichain_token');
+  localStorage.removeItem('agrichain_user');
+  document.getElementById('loginPage').classList.add('active');
+  document.getElementById('mainApp').style.display = 'none';
+  document.getElementById('loginPassword').value = '';
+  showToast('Signed out successfully', 'info');
+}
+
+function showApp() {
+  document.getElementById('loginPage').classList.remove('active');
+  document.getElementById('mainApp').style.display = 'flex';
+  if (CURRENT_USER) {
+    const initials = CURRENT_USER.name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase();
+    document.getElementById('userAvatar').textContent = initials;
+    document.getElementById('userName').textContent = CURRENT_USER.name;
+    document.getElementById('userRole').textContent = CURRENT_USER.role || 'User';
+  }
+  checkApiStatus();
+  loadDashboard();
+}
+
+/* ════════════════════════════════════════
+   NAVIGATION
+════════════════════════════════════════ */
+const pageTitles = {
+  dashboard: 'Dashboard',
+  users: 'Users',
+  farmers: 'Farmers',
+  crops: 'Crop Listings',
+  orders: 'Orders',
+  transactions: 'Transactions & Payments',
+  subsidy: 'Subsidy Programs',
+  audit: 'Audit Logs',
+  reports: 'Reports'
+};
+const pageLoaders = {
+  users: loadUsers,
+  farmers: loadFarmers,
+  crops: loadCrops,
+  orders: loadOrders,
+  transactions: loadTransactions,
+  subsidy: loadSubsidy,
+  audit: loadAudit,
+  reports: loadReports
+};
+
+function navTo(page, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  if (el) el.classList.add('active');
+  document.getElementById('pageTitle').textContent = pageTitles[page] || page;
+  if (pageLoaders[page]) pageLoaders[page]();
+}
+
+function refreshPage() {
+  const activePage = document.querySelector('.page.active');
+  if (activePage) {
+    const id = activePage.id.replace('page-', '');
+    if (id === 'dashboard') loadDashboard();
+    else if (pageLoaders[id]) pageLoaders[id]();
+  }
+  checkApiStatus();
+}
+
+/* ════════════════════════════════════════
+   DEMO DATA
+════════════════════════════════════════ */
+const DEMO = {
+  users: [
+    { id: 1, firstName:'Admin', lastName:'User', email:'admin@agrichain.com', role:'ADMIN', status:'ACTIVE' },
+    { id: 2, firstName:'Ravi', lastName:'Verma', email:'ravi@agrichain.com', role:'FARMER', status:'ACTIVE' },
+    { id: 3, firstName:'Priya', lastName:'Singh', email:'priya@market.com', role:'TRADER', status:'ACTIVE' },
+    { id: 4, firstName:'Audit', lastName:'Team', email:'audit@agrichain.com', role:'AUDITOR', status:'ACTIVE' },
+  ],
+  farmers: [
+    { farmerId:1, firstName:'Ravi', lastName:'Kumar', phone:'9876543210', gender:'MALE', landSize:5.5, farmerStatus:'APPROVED', verificationStatus:'VERIFIED', address:'Ludhiana, Punjab' },
+    { farmerId:2, firstName:'Meena', lastName:'Devi', phone:'9765432109', gender:'FEMALE', landSize:3.2, farmerStatus:'PENDING', verificationStatus:'UNVERIFIED', address:'Nashik, Maharashtra' },
+    { farmerId:3, firstName:'Ajay', lastName:'Patel', phone:'9654321098', gender:'MALE', landSize:8.0, farmerStatus:'APPROVED', verificationStatus:'VERIFIED', address:'Anand, Gujarat' },
+  ],
+  crops: [
+    { listingId:1, cropName:'Wheat', quantity:500, pricePerUnit:25.50, farmerId:1, cropListingStatus:'VALIDATED', location:'Punjab', description:'Premium wheat' },
+    { listingId:2, cropName:'Rice', quantity:300, pricePerUnit:32.00, farmerId:2, cropListingStatus:'PENDING', location:'West Bengal', description:'Basmati rice' },
+    { listingId:3, cropName:'Sugarcane', quantity:1200, pricePerUnit:3.50, farmerId:3, cropListingStatus:'VALIDATED', location:'Maharashtra', description:'Sweet sugarcane' },
+    { listingId:4, cropName:'Cotton', quantity:200, pricePerUnit:65.00, farmerId:1, cropListingStatus:'SOLD', location:'Gujarat', description:'Long staple cotton' },
+  ],
+  orders: [
+    { orderId:1, listingId:1, traderId:3, quantity:100, totalPrice:2550, orderStatus:'CONFIRMED' },
+    { orderId:2, listingId:3, traderId:3, quantity:500, totalPrice:1750, orderStatus:'PENDING' },
+  ],
+  transactions: [
+    { transactionId:1, orderId:1, transactionAmount:2550, transactionStatus:'COMPLETED', transactionDate:'2026-04-18' },
+    { transactionId:2, orderId:2, transactionAmount:1750, transactionStatus:'PENDING', transactionDate:'2026-04-21' },
+  ],
+  subsidies: [
+    { id:1, title:'PM-KISAN 2026', allottedBudget:5000000, subsidyStatus:'ACTIVE', startDate:'2026-01-01', endDate:'2026-12-31', description:'Direct income support' },
+    { id:2, title:'Irrigation Support', allottedBudget:2000000, subsidyStatus:'ACTIVE', startDate:'2026-02-01', endDate:'2026-11-30', description:'Micro-irrigation scheme' },
+  ],
+  auditLogs: [
+    { id:1, action:'LOGIN', performedBy:'admin@agrichain.com', role:'ADMIN', details:'Logged in successfully', timestamp:'2026-04-22T09:00:00' },
+    { id:2, action:'CREATE_LISTING', performedBy:'ravi@farm.com', role:'FARMER', details:'Created crop listing #3', timestamp:'2026-04-22T09:15:00' },
+    { id:3, action:'PLACE_ORDER', performedBy:'priya@market.com', role:'TRADER', details:'Placed order for 100kg wheat', timestamp:'2026-04-22T10:00:00' },
+    { id:4, action:'INITIATE_TRANSACTION', performedBy:'system', role:'SYSTEM', details:'Transaction TXN-001 initiated', timestamp:'2026-04-22T10:02:00' },
+    { id:5, action:'UPDATE_USER', performedBy:'admin@agrichain.com', role:'ADMIN', details:'Updated farmer profile #2', timestamp:'2026-04-22T11:30:00' },
+  ],
+  reports: [
+    { reportId:1, reportType:'TRANSACTION_SUMMARY', generatedAt:'2026-04-22T08:00:00', status:'COMPLETED' },
+    { reportId:2, reportType:'FARMER_REGISTRATION', generatedAt:'2026-04-21T18:00:00', status:'COMPLETED' },
+  ]
+};
+
+/* ════════════════════════════════════════
+   DASHBOARD
+════════════════════════════════════════ */
+async function loadDashboard() {
+  let listings, orders, txns, farmers;
+  try {
+    [listings, orders] = await Promise.all([
+      api('GET', '/market/listings').catch(() => DEMO.crops),
+      api('GET', '/market/orders').catch(() => DEMO.orders)
+    ]);
+    txns = await api('GET', '/transactions/status/PENDING').catch(() => DEMO.transactions.filter(t=>t.transactionStatus==='PENDING'));
+    farmers = await api('GET', '/farmers').catch(() => DEMO.farmers);
+  } catch {
+    listings = DEMO.crops; orders = DEMO.orders;
+    txns = DEMO.transactions; farmers = DEMO.farmers;
+  }
+
+  document.getElementById('stat-listings').textContent = Array.isArray(listings) ? listings.length : '—';
+  document.getElementById('stat-orders').textContent = Array.isArray(orders) ? orders.length : '—';
+  document.getElementById('stat-txns').textContent = Array.isArray(txns) ? txns.length : '—';
+  document.getElementById('stat-farmers').textContent = Array.isArray(farmers) ? farmers.length : '—';
+
+  // Recent listings mini-table
+  const ls = Array.isArray(listings) ? listings.slice(0, 5) : DEMO.crops.slice(0,5);
+  document.getElementById('dashListings').innerHTML = `<div class="table-wrap"><table>
+    <thead><tr><th>Crop</th><th>Qty</th><th>Price</th><th>Status</th></tr></thead>
+    <tbody>${ls.map(l=>`<tr>
+      <td><strong>${l.cropName||'—'}</strong></td>
+      <td>${l.quantity||0} kg</td>
+      <td>₹${l.pricePerUnit||0}</td>
+      <td>${statusBadge(l.cropListingStatus)}</td>
+    </tr>`).join('')}</tbody>
+  </table></div>`;
+
+  const ts = Array.isArray(txns) ? txns.slice(0,5) : DEMO.transactions.slice(0,5);
+  document.getElementById('dashTxns').innerHTML = `<div class="table-wrap"><table>
+    <thead><tr><th>ID</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead>
+    <tbody>${ts.map(t=>`<tr>
+      <td class="text-muted">#${t.transactionId||t.id||'—'}</td>
+      <td>₹${t.transactionAmount||t.amount||0}</td>
+      <td>${statusBadge(t.transactionStatus||t.status)}</td>
+      <td class="text-muted">${fmtDate(t.transactionDate||t.date)}</td>
+    </tr>`).join('')}</tbody>
+  </table></div>`;
+}
+
+/* ════════════════════════════════════════
+   USERS
+════════════════════════════════════════ */
+async function loadUsers() {
+  try {
+    let users = await api('GET', '/users').catch(() => DEMO.users);
+    if (!Array.isArray(users)) users = DEMO.users;
+    renderUsers(users);
+  } catch { renderUsers(DEMO.users); }
+}
+
+function renderUsers(users) {
+  document.getElementById('usersTbody').innerHTML = users.map(u => `<tr>
+    <td class="text-muted">${u.id||'—'}</td>
+    <td><strong>${u.firstName||''} ${u.lastName||''}</strong></td>
+    <td>${u.email||'—'}</td>
+    <td><span class="badge badge-blue">${u.role||'—'}</span></td>
+    <td>${statusBadge(u.status||u.userStatus)}</td>
+    <td>
+      <button class="btn btn-outline btn-sm" onclick="viewUser(${u.id})">View</button>
+      <button class="btn btn-danger btn-sm" onclick="deleteUser(${u.id})">Deactivate</button>
+    </td>
+  </tr>`).join('');
+}
+
+async function submitAddUser() {
+  const body = {
+    firstName: document.getElementById('uFirstName').value,
+    lastName: document.getElementById('uLastName').value,
+    email: document.getElementById('uEmail').value,
+    password: document.getElementById('uPassword').value,
+    role: document.getElementById('uRole').value,
+    phoneNumber: document.getElementById('uPhone').value,
+  };
+  try {
+    await api('POST', '/users/register', body);
+    showToast('User registered successfully', 'success');
+  } catch (e) {
+    showToast('Registered (demo: ' + e.message.slice(0,40) + ')', 'info');
+  }
+  closeModal('addUserModal');
+  loadUsers();
+}
+
+async function deleteUser(id) {
+  if (!confirm('Deactivate this user?')) return;
+  try {
+    await api('DELETE', '/users/' + id);
+    showToast('User deactivated', 'success');
+  } catch { showToast('Deactivated (demo mode)', 'info'); }
+  loadUsers();
+}
+
+async function viewUser(id) {
+  try {
+    const u = await api('GET', '/users/' + id).catch(() => DEMO.users.find(x=>x.id===id)||{id});
+    showToast(`User: ${u.firstName||''} ${u.lastName||''} — ${u.email||''}`, 'info');
+  } catch { showToast('Viewing user ' + id, 'info'); }
+}
+
+/* ════════════════════════════════════════
+   FARMERS
+════════════════════════════════════════ */
+async function loadFarmers() {
+  try {
+    let farmers = await api('GET', '/farmers').catch(() => DEMO.farmers);
+    if (!Array.isArray(farmers)) farmers = DEMO.farmers;
+    renderFarmers(farmers);
+  } catch { renderFarmers(DEMO.farmers); }
+}
+
+function renderFarmers(farmers) {
+  document.getElementById('farmersTbody').innerHTML = farmers.map(f => `<tr>
+    <td class="text-muted">${f.farmerId||f.id||'—'}</td>
+    <td><strong>${f.firstName||''} ${f.lastName||''}</strong></td>
+    <td>${f.gender||'—'}</td>
+    <td>${statusBadge(f.farmerStatus||f.status)}</td>
+    <td>${statusBadge(f.verificationStatus)}</td>
+    <td>${f.phone||f.phoneNumber||'—'}</td>
+    <td>
+      <button class="btn btn-outline btn-sm" onclick="viewFarmer(${f.farmerId||f.id})">View</button>
+      <button class="btn btn-danger btn-sm" onclick="deleteFarmer(${f.farmerId||f.id})">Delete</button>
+    </td>
+  </tr>`).join('');
+}
+
+async function submitAddFarmer() {
+  const body = {
+    firstName: document.getElementById('fFirst').value,
+    lastName: document.getElementById('fLast').value,
+    phone: document.getElementById('fPhone').value,
+    gender: document.getElementById('fGender').value,
+    landSize: parseFloat(document.getElementById('fLand').value) || 0,
+    address: document.getElementById('fAddr').value,
+  };
+  try {
+    await api('POST', '/farmers', body);
+    showToast('Farmer registered!', 'success');
+  } catch { showToast('Farmer registered (demo)', 'info'); }
+  closeModal('addFarmerModal');
+  loadFarmers();
+}
+
+async function deleteFarmer(id) {
+  if (!confirm('Delete farmer #' + id + '?')) return;
+  try {
+    await api('DELETE', '/farmers/' + id);
+    showToast('Farmer deleted', 'success');
+  } catch { showToast('Deleted (demo mode)', 'info'); }
+  loadFarmers();
+}
+
+async function viewFarmer(id) {
+  const f = DEMO.farmers.find(x=>(x.farmerId||x.id)===id) || {farmerId:id};
+  showToast(`Farmer #${id}: ${f.firstName||''} ${f.lastName||''} — ${f.address||''}`, 'info');
+}
+
+/* ════════════════════════════════════════
+   CROP LISTINGS
+════════════════════════════════════════ */
+async function loadCrops(status = '') {
+  try {
+    const path = status ? `/market/listings/status/${status}` : '/market/listings';
+    let crops = await api('GET', path).catch(() => status ? DEMO.crops.filter(c=>c.cropListingStatus===status) : DEMO.crops);
+    if (!Array.isArray(crops)) crops = DEMO.crops;
+    renderCrops(crops);
+  } catch { renderCrops(DEMO.crops); }
+}
+
+function renderCrops(crops) {
+  document.getElementById('cropsTbody').innerHTML = crops.map(c => `<tr>
+    <td class="text-muted">${c.listingId||c.id||'—'}</td>
+    <td><strong>${c.cropName||'—'}</strong></td>
+    <td>${c.quantity||0} kg</td>
+    <td>₹${c.pricePerUnit||0}/kg</td>
+    <td>${c.farmerId||'—'}</td>
+    <td>${statusBadge(c.cropListingStatus||c.status)}</td>
+    <td>
+      ${(c.cropListingStatus==='PENDING'||!c.cropListingStatus) ? `<button class="btn btn-success btn-sm" onclick="validateListing(${c.listingId||c.id})">Validate</button>` : ''}
+    </td>
+  </tr>`).join('');
+}
+
+async function filterCropsByStatus(status) { loadCrops(status); }
+
+async function validateListing(id) {
+  try {
+    await api('PUT', `/market/listings/validate/${id}`);
+    showToast('Listing #' + id + ' validated!', 'success');
+  } catch { showToast('Validated (demo mode)', 'info'); }
+  loadCrops();
+}
+
+async function submitCropListing() {
+  const body = {
+    cropName: document.getElementById('cropName').value,
+    farmerId: parseInt(document.getElementById('cropFarmerId').value),
+    quantity: parseInt(document.getElementById('cropQty').value),
+    pricePerUnit: parseFloat(document.getElementById('cropPrice').value),
+    location: document.getElementById('cropLocation').value,
+    description: document.getElementById('cropDesc').value,
+  };
+  try {
+    await api('POST', '/market/createlisting', body);
+    showToast('Crop listing created!', 'success');
+  } catch { showToast('Created (demo mode)', 'info'); }
+  closeModal('addCropModal');
+  loadCrops();
+}
+
+/* ════════════════════════════════════════
+   ORDERS
+════════════════════════════════════════ */
+async function loadOrders() {
+  try {
+    let orders = await api('GET', '/market/orders').catch(() => DEMO.orders);
+    if (!Array.isArray(orders)) orders = DEMO.orders;
+    renderOrders(orders);
+  } catch { renderOrders(DEMO.orders); }
+}
+
+function renderOrders(orders) {
+  document.getElementById('ordersTbody').innerHTML = orders.map(o => `<tr>
+    <td class="text-muted">#${o.orderId||o.id||'—'}</td>
+    <td>${o.listingId||'—'}</td>
+    <td>${o.traderId||'—'}</td>
+    <td>${o.quantity||0} kg</td>
+    <td>₹${o.totalPrice||0}</td>
+    <td>${statusBadge(o.orderStatus||o.status)}</td>
+    <td>
+      <select class="form-control" style="width:130px;padding:4px 8px;font-size:12px" onchange="updateOrderStatus(${o.orderId||o.id}, this.value)">
+        <option>PENDING</option><option>CONFIRMED</option><option>SHIPPED</option><option>DELIVERED</option><option>CANCELLED</option>
+      </select>
+    </td>
+  </tr>`).join('');
+}
+
+async function submitOrder() {
+  const body = {
+    listingId: parseInt(document.getElementById('ordListingId').value),
+    traderId: parseInt(document.getElementById('ordTraderId').value),
+    quantity: parseInt(document.getElementById('ordQty').value),
+    totalPrice: parseFloat(document.getElementById('ordPrice').value),
+  };
+  try {
+    await api('POST', '/market/placeorder', body);
+    showToast('Order placed!', 'success');
+  } catch { showToast('Order placed (demo)', 'info'); }
+  closeModal('placeOrderModal');
+  loadOrders();
+}
+
+async function updateOrderStatus(id, status) {
+  try {
+    await api('PUT', `/market/orders/${id}/status?status=${status}`);
+    showToast(`Order #${id} status → ${status}`, 'success');
+  } catch { showToast('Updated (demo)', 'info'); }
+}
+
+/* ════════════════════════════════════════
+   TRANSACTIONS
+════════════════════════════════════════ */
+async function loadTransactions() {
+  try {
+    let txns = await api('GET', '/transactions/status/PENDING').catch(() => DEMO.transactions);
+    if (!Array.isArray(txns)) txns = DEMO.transactions;
+    renderTransactions(txns);
+  } catch { renderTransactions(DEMO.transactions); }
+}
+
+function renderTransactions(txns) {
+  document.getElementById('txnTbody').innerHTML = txns.map(t => `<tr>
+    <td class="text-muted">#${t.transactionId||t.id||'—'}</td>
+    <td>${t.orderId||'—'}</td>
+    <td>₹${t.transactionAmount||t.amount||0}</td>
+    <td>${statusBadge(t.transactionStatus||t.status)}</td>
+    <td class="text-muted">${fmtDate(t.transactionDate||t.date)}</td>
+    <td>
+      ${(t.transactionStatus==='PENDING'||!t.transactionStatus) ? `<button class="btn btn-success btn-sm" onclick="finalizeTransaction(${t.transactionId||t.id})">Finalize</button>` : ''}
+    </td>
+  </tr>`).join('');
+}
+
+async function submitTransaction() {
+  const body = {
+    orderId: parseInt(document.getElementById('txOrderId').value),
+    amount: parseFloat(document.getElementById('txAmount').value),
+  };
+  try {
+    await api('POST', '/transactions/initiate', body);
+    showToast('Transaction initiated!', 'success');
+  } catch { showToast('Transaction initiated (demo)', 'info'); }
+  closeModal('initiateModal');
+  loadTransactions();
+}
+
+async function finalizeTransaction(id) {
+  try {
+    await api('PUT', `/transactions/${id}/finalize`);
+    showToast('Transaction #' + id + ' finalized!', 'success');
+  } catch { showToast('Finalized (demo)', 'info'); }
+  loadTransactions();
+}
+
+async function recordPayment() {
+  const txnId = parseInt(document.getElementById('payTxnId').value);
+  const method = document.getElementById('payMethod').value;
+  if (!txnId) { showToast('Enter a Transaction ID', 'error'); return; }
+  try {
+    await api('POST', '/transactions/payment/record', { transactionId: txnId, method });
+    showToast('Payment recorded!', 'success');
+  } catch { showToast('Payment recorded (demo)', 'info'); }
+}
+
+/* ════════════════════════════════════════
+   SUBSIDY
+════════════════════════════════════════ */
+async function loadSubsidy() {
+  try {
+    let progs = await api('GET', '/subsidy-programs').catch(() => DEMO.subsidies);
+    if (!Array.isArray(progs)) progs = DEMO.subsidies;
+    renderSubsidy(progs);
+  } catch { renderSubsidy(DEMO.subsidies); }
+}
+
+function renderSubsidy(progs) {
+  document.getElementById('subsidyTbody').innerHTML = progs.map(p => `<tr>
+    <td class="text-muted">${p.id||p.programId||'—'}</td>
+    <td><strong>${p.title||'—'}</strong></td>
+    <td>₹${(p.allottedBudget||0).toLocaleString('en-IN')}</td>
+    <td>${statusBadge(p.subsidyStatus||p.status)}</td>
+    <td class="text-muted">${fmtDate(p.startDate)}</td>
+    <td class="text-muted">${fmtDate(p.endDate)}</td>
+    <td>
+      <button class="btn btn-danger btn-sm" onclick="deleteSubsidy(${p.id})">Delete</button>
+    </td>
+  </tr>`).join('');
+}
+
+async function submitSubsidy() {
+  const body = {
+    title: document.getElementById('subTitle').value,
+    allottedBudget: parseFloat(document.getElementById('subBudget').value),
+    subsidyStatus: document.getElementById('subStatus').value,
+    startDate: document.getElementById('subStart').value,
+    endDate: document.getElementById('subEnd').value,
+    description: document.getElementById('subDesc').value,
+  };
+  try {
+    await api('POST', '/subsidy-programs', body);
+    showToast('Subsidy program created!', 'success');
+  } catch { showToast('Created (demo)', 'info'); }
+  closeModal('addSubsidyModal');
+  loadSubsidy();
+}
+
+async function deleteSubsidy(id) {
+  if (!confirm('Delete subsidy program #' + id + '?')) return;
+  try {
+    await api('DELETE', '/subsidy-programs/' + id);
+    showToast('Program deleted', 'success');
+  } catch { showToast('Deleted (demo)', 'info'); }
+  loadSubsidy();
+}
+
+/* ════════════════════════════════════════
+   AUDIT LOGS
+════════════════════════════════════════ */
+async function loadAudit() {
+  try {
+    let logs = await api('GET', '/api/auditlogs').catch(() => DEMO.auditLogs);
+    if (!Array.isArray(logs)) logs = DEMO.auditLogs;
+    renderAudit(logs);
+  } catch { renderAudit(DEMO.auditLogs); }
+}
+
+function renderAudit(logs) {
+  const sorted = [...logs].sort((a,b) => new Date(b.timestamp||0) - new Date(a.timestamp||0));
+  document.getElementById('auditTimeline').innerHTML = sorted.slice(0,8).map(l => `<li>
+    <div class="tl-time">${fmtDatetime(l.timestamp)}</div>
+    <div class="tl-action">${l.action||'—'}</div>
+    <div class="tl-detail">${l.details||''} · <em>${l.performedBy||''}</em></div>
+  </li>`).join('');
+
+  document.getElementById('auditTbody').innerHTML = sorted.map(l => `<tr>
+    <td><span class="badge badge-blue">${l.action||'—'}</span></td>
+    <td>${l.performedBy||'—'}</td>
+    <td><span class="badge badge-grey">${l.role||'—'}</span></td>
+    <td class="text-muted">${fmtDatetime(l.timestamp)}</td>
+  </tr>`).join('');
+}
+
+/* ════════════════════════════════════════
+   REPORTS
+════════════════════════════════════════ */
+async function loadReports() {
+  try {
+    let rpts = await api('GET', '/api/report').catch(() => DEMO.reports);
+    if (!Array.isArray(rpts)) rpts = DEMO.reports;
+    renderReports(rpts);
+  } catch { renderReports(DEMO.reports); }
+  renderDemoChart();
+}
+
+function renderReports(rpts) {
+  document.getElementById('reportsTbody').innerHTML = rpts.map(r => `<tr>
+    <td class="text-muted">#${r.reportId||r.id||'—'}</td>
+    <td>${r.reportType||'—'}</td>
+    <td class="text-muted">${fmtDatetime(r.generatedAt||r.createdAt)}</td>
+    <td>${statusBadge(r.status||'COMPLETED')}</td>
+  </tr>`).join('');
+}
+
+function renderDemoChart() {
+  const months = ['Oct','Nov','Dec','Jan','Feb','Mar','Apr'];
+  const values = [45,62,38,75,58,89,104];
+  const max = Math.max(...values);
+  document.getElementById('reportChart').innerHTML = months.map((m,i) => `
+    <div class="bar" style="height:${(values[i]/max*100)}%" title="${values[i]} transactions in ${m}">
+      <div class="bar-label">${m}</div>
+    </div>
+  `).join('');
+}
+
+async function generateReport() {
+  try {
+    await api('POST', '/api/report/generate', { type: 'TRANSACTION_SUMMARY', period: 'MONTHLY' });
+    showToast('Report generation started!', 'success');
+  } catch { showToast('Report queued (demo mode)', 'info'); }
+}
+
+/* ════════════════════════════════════════
+   MODAL HELPERS
+════════════════════════════════════════ */
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+// Close on overlay click
+document.addEventListener('click', e => {
+  if (e.target.classList.contains('modal-overlay')) {
+    e.target.classList.remove('open');
+  }
+});
+
+/* ════════════════════════════════════════
+   TAB SWITCHING
+════════════════════════════════════════ */
+function switchTab(group, contentId, el) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById(contentId).classList.add('active');
+}
+
+/* ════════════════════════════════════════
+   TOAST
+════════════════════════════════════════ */
+function showToast(msg, type = 'info') {
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  const icons = { success: '✓', error: '✗', info: 'ℹ' };
+  el.innerHTML = `<span>${icons[type]||'•'}</span><span>${msg}</span>`;
+  document.getElementById('toastContainer').appendChild(el);
+  setTimeout(() => { el.style.opacity = '0'; el.style.transform = 'translateX(60px)'; el.style.transition = 'all .3s'; setTimeout(() => el.remove(), 300); }, 3500);
+}
+
+/* ════════════════════════════════════════
+   TABLE FILTER
+════════════════════════════════════════ */
+function filterTable(tableId, query) {
+  const q = query.toLowerCase();
+  const rows = document.querySelectorAll('#' + tableId + ' tbody tr');
+  rows.forEach(r => {
+    r.style.display = r.textContent.toLowerCase().includes(q) ? '' : 'none';
+  });
+}
+
+/* ════════════════════════════════════════
+   UTILS
+════════════════════════════════════════ */
+function statusBadge(status) {
+  if (!status) return '<span class="badge badge-grey">—</span>';
+  const map = {
+    ACTIVE:'badge-green', APPROVED:'badge-green', VALIDATED:'badge-green',
+    COMPLETED:'badge-green', CONFIRMED:'badge-green', DELIVERED:'badge-green',
+    VERIFIED:'badge-green', SUCCESS:'badge-green', ONLINE:'badge-green',
+    PENDING:'badge-gold', UNVERIFIED:'badge-gold', PROCESSING:'badge-gold',
+    INACTIVE:'badge-grey', CANCELLED:'badge-red', REJECTED:'badge-red',
+    FAILED:'badge-red', OFFLINE:'badge-red', DEACTIVATED:'badge-red',
+    SOLD:'badge-blue', SHIPPED:'badge-blue',
+  };
+  const cls = map[status.toUpperCase()] || 'badge-grey';
+  return `<span class="badge ${cls}">${status}</span>`;
+}
+
+function fmtDate(d) {
+  if (!d) return '—';
+  try { return new Date(d).toLocaleDateString('en-IN', {day:'2-digit',month:'short',year:'numeric'}); }
+  catch { return d; }
+}
+
+function fmtDatetime(d) {
+  if (!d) return '—';
+  try { return new Date(d).toLocaleString('en-IN', {day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}); }
+  catch { return d; }
+}
+
+/* ════════════════════════════════════════
+   KEYBOARD SHORTCUTS
+════════════════════════════════════════ */
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
+});
+
+/* ════════════════════════════════════════
+   INIT
+════════════════════════════════════════ */
+window.addEventListener('load', () => {
+  if (JWT_TOKEN) showApp();
+  // Auto-fill demo credentials
+  document.getElementById('loginEmail').value = 'admin@agrichain.com';
+  document.getElementById('loginPassword').value = 'admin123';
+});
+</script>
+</body>
+</html>
