@@ -1,24 +1,45 @@
+Role: Act as a Senior Angular Developer to build a high-fidelity Transaction & Payment Portal. This module must emulate the smooth, intuitive flow of modern fintech applications (like GPay or Stripe) while serving as the frontend for the transaction-payment microservice.
 
+UI/UX Architecture (Mobile-First):
 
-Role: Act as a Senior Angular Developer and create a professional, responsive Transaction & Payment Management module for a multi-service enterprise application. This module serves as the primary interface for the transaction-payment microservice, facilitating the bridge between Order fulfillment and financial finalization.
-UI Architecture:
-Navigation: Implement a top navigation bar (as a div) with links for "Transactions," "Payment Portal," and "Financial Reports."
-Styling: Use a clean, corporate theme (Angular Material or Tailwind CSS). Ensure robust handling for ResourceNotFoundException with user-friendly "Toast" notifications and a centralized service layer using an HttpClient wrapper.
-Feature Requirements:
-Transaction Tracking Dashboard:
-Implement a data table to view all transactions with server-side filtering by TransactionStatus (PENDING, COMPLETED, CANCELLED) and a date range picker (start/end dates).
-Include a "Final Amount" calculation display that visually highlights the 2% platform fee logic processed via the /{transactionId}/final-amount endpoint.
-Add a "Finalize" action button for PENDING transactions that triggers the two-step remote logic (inventory reduction and order completion).
-Payment Processing Portal:
-Develop a Payment Initiation Form (Reactive Form) using PaymentRequestDTO to link a transactionId with a PaymentType (CREDIT_CARD, UPI, etc.).
-Implement a Callback Simulation Interface for administrators to manually trigger /payment/callback/{id} with PaymentStatus updates (PAID, FAILED), mimicking external gateway webhooks.
-Ensure the UI reflects real-time status changes when a payment moves to PAID, triggering the backend's finalizeTransaction flow.
-Audit & Verification:
-Include a "Status Badge" system for both Payments and Transactions that updates dynamically without a full page refresh.
-Implement a "Test Connection" button that calls the /test-data endpoint to verify service availability ("Yes Working").
+Modern Layout: Use a "Card-Based" UI rather than heavy tables. Transactions should appear as sleek list items that expand to show details.
+
+Styling: Implement a "Glassmorphism" or "Clean Material 3" theme using Tailwind CSS. Use vibrant status colors: Emerald-500 for Success, Amber-500 for Pending, and Rose-500 for Failed.
+
+Feedback Loops: Use Lottie animations or CSS loaders for "Processing Payment" states. Every action must trigger a non-blocking "Toast" notification (e.g., “Payment Verified – Inventory Updated”).
+
+Feature Requirements (The "Phone-App" Flow):
+
+Activity Feed (Transactions Dashboard):
+
+Create a "Recent Activity" list with infinite scroll.
+
+The Breakdown: Each item must show the base amount and the 2% Platform Fee clearly (e.g., $100.00 + $2.00 Fee).
+
+Smart Filtering: A "Chip-based" filter system at the top for quick toggling between Paid, Pending, and Cancelled.
+
+The Payment "Checkout" Flow:
+
+Initiation: When a user clicks "Pay," trigger a bottom-sheet or a sleek modal.
+
+Method Selection: A visual grid of payment options (UPI, Card, Wallet) that maps to your PaymentType enum.
+
+Atomic Handshake: Upon clicking "Confirm," call /payment/record. While the request is in flight, show a "Securing Payment" loading state.
+
+Real-Time Finalization Bridge:
+
+The Callback Simulator: For testing/Admin roles, create a hidden or restricted toggle that simulates the gateway response (/payment/callback/{id}).
+
+Success Animation: When the backend triggers finalizeTransaction, the UI must automatically transition the transaction status to "COMPLETED" and show a "Success" checkmark.
+
+Inventory Sync Alert: Show a brief confirmation that says: "Stock updated successfully via Market Service."
+
 Technical Specifications:
-Routing: Set up /finance/transactions and /finance/payments as the primary feature routes.
-Models: Generate TypeScript interfaces for TransactionResponseDTO, PaymentResponseDTO, OrderDTO, and PaymentRequestDTO matching the Spring Boot entity structures.
-Enums: Define TransactionStatus (PENDING, COMPLETED, CANCELLED), PaymentStatus (PAID, FAILED), and PaymentType to populate selection menus.
-Security: Integrate a JWT Interceptor to ensure the Authorization header is present. The UI must extract the user role (TRADER/ADMIN) to restrict access to the "Finalize" and "Callback" actions.
-Inter-service Handling: Design the UI to handle "Partial Success" states. If the MarketClient remote call fails during finalization, the UI must display a "System Sync Error" and block further status updates to prevent data inconsistency.
+
+State Management: Use a simple BehaviorSubject in your service layer to ensure that if a payment is marked "PAID," the Transaction list updates instantly without a page reload.
+
+Interceptors: A JWT Interceptor must handle the Authorization: Bearer token. A second Error Interceptor must catch ResourceNotFoundException and map it to a user-friendly "Oops! This transaction no longer exists" message.
+
+Models & Enums: Generate strict TypeScript interfaces for OrderDTO, TransactionRequestDTO, and PaymentStatus. Use Enums to drive the color-coding logic of the status badges.
+
+Resiliency: If the marketClient call fails (Inter-service error), the UI must prevent the "Success" state and offer a "Retry Sync" button to keep the UI and Backend in harmony.
