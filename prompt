@@ -1,45 +1,155 @@
-Role: Act as a Senior Angular Developer to build a high-fidelity Transaction & Payment Portal. This module must emulate the smooth, intuitive flow of modern fintech applications (like GPay or Stripe) while serving as the frontend for the transaction-payment microservice.
+You are a Senior Angular Developer. I am giving you a ZIP file of my existing project. Before writing a single line of code, you must fully read and understand my project structure.
+Step 1 — Read the ZIP First
+Extract and analyze the ZIP file I have uploaded. You must identify:
 
-UI/UX Architecture (Mobile-First):
+The root folder structure
+All existing modules, components, services, and interceptors
+The package.json to know Angular version, Tailwind version, and all installed dependencies
+The environment.ts / environment.development.ts to extract the baseUrl for API calls
+Any existing app.module.ts or app.config.ts to understand if the project uses Standalone Components or NgModule pattern
+Any existing models or interfaces already defined so you do not duplicate them
+The existing routing setup (app-routing.module.ts or app.routes.ts)
+Any existing interceptors, guards, or shared services already present
+The existing folder naming convention (kebab-case, camelCase, etc.) and file naming pattern — match it exactly
 
-Modern Layout: Use a "Card-Based" UI rather than heavy tables. Transactions should appear as sleek list items that expand to show details.
+Do not assume anything. Only use what you find inside the ZIP.
 
-Styling: Implement a "Glassmorphism" or "Clean Material 3" theme using Tailwind CSS. Use vibrant status colors: Emerald-500 for Success, Amber-500 for Pending, and Rose-500 for Failed.
+Step 2 — Report What You Found
+Before generating any code, give me a short summary:
 
-Feedback Loops: Use Lottie animations or CSS loaders for "Processing Payment" states. Every action must trigger a non-blocking "Toast" notification (e.g., “Payment Verified – Inventory Updated”).
+Angular version detected
+Standalone or NgModule architecture
+Base API URL found
+Existing modules and their purpose
+Any conflicts or missing pieces I should know about (e.g., no auth service found, no Tailwind config found)
 
-Feature Requirements (The "Phone-App" Flow):
+Ask me to confirm before proceeding.
 
-Activity Feed (Transactions Dashboard):
+Step 3 — Build the Transaction & Payment Module
+After I confirm, generate the full Transaction & Payment Module that fits perfectly into my existing project. Follow these exact rules:
+The Exact User Flow to Implement
+Checkout Page
 
-Create a "Recent Activity" list with infinite scroll.
+Show the full order summary: line items, subtotal, 2% platform fee (calculated live), grand total
+"Proceed to Pay" button opens the payment method selection
 
-The Breakdown: Each item must show the base amount and the 2% Platform Fee clearly (e.g., $100.00 + $2.00 Fee).
+Payment Method Selection
 
-Smart Filtering: A "Chip-based" filter system at the top for quick toggling between Paid, Pending, and Cancelled.
+Bottom sheet or modal with method cards: UPI, Card, Net Banking, Wallet
+Maps to PaymentType enum
+Sticky order total visible at bottom
+"Confirm Payment" triggers the transaction lifecycle
 
-The Payment "Checkout" Flow:
+Transaction Lifecycle — Show Every Backend Hop as a Live UI Step
+The screen must show a live vertical stepper with these exact 7 steps updating in real time:
+Step 1 → Initiating Transaction     POST /transaction/create
+Step 2 → Recording Payment          POST /payment/record
+Step 3 → Awaiting Gateway           GET  /payment/status/{id}  (poll every 3s)
+Step 4 → Gateway Callback Received  POST /payment/callback/{id}
+Step 5 → Finalizing Transaction     (backend internal — show as UI step)
+Step 6 → Syncing Inventory          (marketClient call — show as UI step)
+Step 7 → Done
+Each step shows its name, a pulse animation while active, a checkmark when done, and a timestamp.
+Resolution Screen
 
-Initiation: When a user clicks "Pay," trigger a bottom-sheet or a sleek modal.
+Full success → animated checkmark + order ID + "Stock updated via Market Service"
+Inventory sync failure → payment marked success + yellow warning + "Retry Sync" button
+Payment failure → red screen + reason + "Try Another Method" button
 
-Method Selection: A visual grid of payment options (UPI, Card, Wallet) that maps to your PaymentType enum.
 
-Atomic Handshake: Upon clicking "Confirm," call /payment/record. While the request is in flight, show a "Securing Payment" loading state.
+API Calls to Wire (Read the base URL from my environment file)
+POST   /transaction/create
+POST   /payment/record
+GET    /payment/status/{paymentId}     ← poll every 3s until terminal status
+POST   /payment/callback/{paymentId}   ← Admin/test only
+GET    /transaction/{transactionId}    ← confirm finalization
 
-Real-Time Finalization Bridge:
+TypeScript Models to Generate
+Only generate these if they do not already exist in my project:
+typescriptenum PaymentType { UPI, CARD, NET_BANKING, WALLET }
 
-The Callback Simulator: For testing/Admin roles, create a hidden or restricted toggle that simulates the gateway response (/payment/callback/{id}).
+enum PaymentStatus { INITIATED, PENDING, PROCESSING, PAID, FAILED, COMPLETED }
 
-Success Animation: When the backend triggers finalizeTransaction, the UI must automatically transition the transaction status to "COMPLETED" and show a "Success" checkmark.
+enum TransactionStep {
+  INITIATING, RECORDING, AWAITING_GATEWAY,
+  CALLBACK_RECEIVED, FINALIZING, SYNCING_INVENTORY, DONE
+}
 
-Inventory Sync Alert: Show a brief confirmation that says: "Stock updated successfully via Market Service."
+interface OrderDTO { orderId, items, subtotal, platformFee, grandTotal, deliveryAddress, estimatedDelivery }
 
-Technical Specifications:
+interface TransactionRequestDTO { orderId, amount, paymentType }
 
-State Management: Use a simple BehaviorSubject in your service layer to ensure that if a payment is marked "PAID," the Transaction list updates instantly without a page reload.
+interface PaymentRecordDTO { transactionId, paymentType, amount }
 
-Interceptors: A JWT Interceptor must handle the Authorization: Bearer token. A second Error Interceptor must catch ResourceNotFoundException and map it to a user-friendly "Oops! This transaction no longer exists" message.
+Services to Generate
+TransactionStateService — BehaviorSubject-based state:
 
-Models & Enums: Generate strict TypeScript interfaces for OrderDTO, TransactionRequestDTO, and PaymentStatus. Use Enums to drive the color-coding logic of the status badges.
+currentStep$ → drives the stepper UI
+paymentStatus$ → drives status badges
+syncStatus$ → drives inventory sync banner
 
-Resiliency: If the marketClient call fails (Inter-service error), the UI must prevent the "Success" state and offer a "Retry Sync" button to keep the UI and Backend in harmony.
+CheckoutService
+
+getOrderDetails(orderId): Observable<OrderDTO>
+
+TransactionService
+
+createTransaction(dto): Observable<>
+finalizeCheck(transactionId): Observable<>
+getTransactionHistory(): Observable<>
+
+PaymentService
+
+recordPayment(dto): Observable<>
+pollPaymentStatus(paymentId) — interval(3000) + switchMap + takeUntil terminal state
+triggerCallback(paymentId, payload) — Admin only
+retryInventorySync(transactionId): Observable<>
+
+
+Interceptors
+Only generate these if they do not already exist in my project:
+JwtInterceptor — reads token from whatever auth pattern exists in my project (find it in the ZIP), attaches Authorization: Bearer <token>
+ErrorInterceptor — maps these to toast messages:
+
+404 → "This transaction no longer exists"
+409 → "This order already has an active payment"
+503 → "Inventory sync failed — payment was still recorded"
+500 → "Something went wrong. Please try again"
+
+
+Components to Generate
+Match my existing folder structure and naming convention exactly:
+checkout/
+  checkout.component.ts
+  payment-method.component.ts
+  transaction-stepper.component.ts
+  resolution.component.ts
+
+dashboard/
+  activity-feed.component.ts
+  transaction-card.component.ts
+
+shared/
+  toast.component.ts
+  status-badge.component.ts
+Register all new routes inside my existing routing file — do not create a second router.
+
+UI Rules
+
+Use only the Tailwind classes already configured in my project (read tailwind.config.js)
+Status colors: emerald-500 for success, amber-500 for pending, rose-500 for failed, blue-500 for initiated
+Stepper active step → pulse CSS animation
+Toast → top-right, auto-dismiss after 4 seconds, non-blocking
+Activity feed → card-based, chip filters (All / Paid / Pending / Failed), expandable cards showing base amount + fee breakdown
+
+
+Resiliency Rules
+
+If POST /payment/record fails → stop the flow immediately, do not advance the stepper
+If polling exceeds 5 minutes → show "Payment is taking longer than usual" but keep polling
+If marketClient sync fails → keep transaction as COMPLETED, show yellow retry banner
+If GET /transaction/{id} returns FAILED → jump stepper to failed state, offer retry
+
+
+Final Instruction to the AI
+Do not generate boilerplate. Do not invent a project structure. Read what I give you, match it exactly, and only add what is missing. Every file you generate must be drop-in ready — no manual wiring should be needed beyond what you explicitly tell me to do in a short "integration steps" note at the end.
